@@ -3,12 +3,19 @@ from rest_framework.response import Response
 from django.core.paginator import Paginator
 from ..models import Disease
 from ..serializers.disease import DiseaseSerializer
+from ..exceptions.BadRequestException import BadRequestException
 
 class DiseaseController(APIView):
     def get(self, request):
+        
         # query param ?page=2&size=5
-        page = int(request.GET.get('page', 1))
-        size = int(request.GET.get('size', 10))
+        page = request.GET.get('page', 1)
+        size = request.GET.get('size', 10)
+        try:
+            page = int(page)
+            size = int(size)
+        except ValueError:
+            raise BadRequestException("Query parameters 'page' and 'size' must be integers.")
 
         diseases = Disease.objects.all()
         paginator = Paginator(diseases, size)
