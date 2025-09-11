@@ -31,7 +31,9 @@ services:
   # -------------------------------------
   backend:
     # สั่งให้สร้าง Image จาก Dockerfile ในไดเรกทอรีปัจจุบัน
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile.dev
     container_name: django_backend
     # คำสั่งที่ให้ Container รันเมื่อเริ่มต้น (Django development server)
     command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
