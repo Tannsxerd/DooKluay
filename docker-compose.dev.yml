@@ -34,7 +34,7 @@ services:
     build: .
     container_name: django_backend
     # คำสั่งที่ให้ Container รันเมื่อเริ่มต้น (Django development server)
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     # Mount โค้ดปัจจุบันเข้าไปใน Container ทำให้แก้โค้ดแล้วเห็นผลทันที (Hot Reload)
     volumes:
       - .:/app
