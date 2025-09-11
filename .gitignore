@@ -13,7 +13,7 @@ build/
 venv/
 .env/
 *.env
-.env
+
 # Django stuff
 *.log
 db.sqlite3
