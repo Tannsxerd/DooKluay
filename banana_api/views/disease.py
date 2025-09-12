@@ -5,7 +5,7 @@ from ..models import Disease
 from ..serializers.disease import DiseaseSerializer
 from ..exceptions.BadRequestException import BadRequestException
 
-class DiseaseController(APIView):
+class DiseaseList(APIView):
     def get(self, request):
         
         # query param ?page=2&size=5
