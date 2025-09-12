@@ -1,9 +1,18 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+# Django imports
 from django.core.paginator import Paginator
+from django.http import Http404
+
+# Third-party imports (Django REST Framework)
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+# Local application imports
+from ..exceptions.BadRequestException import BadRequestException
 from ..models import Disease
 from ..serializers.disease import DiseaseSerializer
-from ..exceptions.BadRequestException import BadRequestException
+
+
 
 class DiseaseList(APIView):
     def get(self, request):
@@ -31,5 +40,23 @@ class DiseaseList(APIView):
             "results": serializer.data
         })
     
-    # Test
-    # Test pull request
+
+# คลาสนี้ใช้สำหรับดึงข้อมูล Disease เพียงรายการเดียวตาม pk (Primary Key)
+class DiseaseDetail(APIView):
+    """
+    ดึงข้อมูล disease จาก id ที่ระบุ
+    """
+    def get(self, request, pk, format=None):
+        try:
+            # 1. ค้นหา object จาก model Disease โดยใช้ pk ที่ได้รับจาก URL
+            disease = Disease.objects.get(pk=pk)
+        except Disease.DoesNotExist:
+            # ถ้าไม่เจอให้ raise Http404
+            raise Http404("Disease not found")
+
+        # 3. หากพบข้อมูล นำ object ไป serialize (ไม่ต้องใช้ many=True เพราะเป็น object เดียว)
+        serializer = DiseaseSerializer(disease)
+        
+        # 4. ส่งข้อมูลที่ serialize แล้วกลับไปใน Response
+        return Response(serializer.data)
+
