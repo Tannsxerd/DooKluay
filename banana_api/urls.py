@@ -1,6 +1,7 @@
 from django.urls import path
 from .views.disease import DiseaseList, DiseaseDetail
 from .views.treatment import Treatmentlist, TreatmentDetails
+from .views.ImageUpload import ImageDetailView,ImageViewALL
 
 urlpatterns = [
     path('disease/', DiseaseList.as_view(), name='disease_List'),
