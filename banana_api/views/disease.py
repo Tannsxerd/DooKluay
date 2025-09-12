@@ -30,3 +30,5 @@ class DiseaseList(APIView):
             "page_size": size,
             "results": serializer.data
         })
+    
+    # Test
