@@ -32,9 +32,9 @@ docker-compose -f docker-compose.dev.yml up --build
 
 
 ## Tech Stack
-- Backend: Python (Django/FastAPI)
-- Model: TensorFlow / PyTorch
-- Frontend: React / Vue
+- Backend: Python (Django)
+- Model: TensorFlow 
+- Frontend: React 
 - Deploy: Docker
 
 ---
