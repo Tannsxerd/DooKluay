@@ -14,3 +14,7 @@ class Prediction(models.Model):
 
     def __str__(self):
         return f"Prediction for {self.image.file_path.name} -> {self.disease.name} ({self.confidence:.2%})"
+    
+
+
+
