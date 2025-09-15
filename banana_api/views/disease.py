@@ -11,20 +11,23 @@ from rest_framework.views import APIView
 from ..exceptions.BadRequestException import BadRequestException
 from ..models import Disease
 from ..serializers.disease import DiseaseSerializer
+from ..utils.pagination import get_pagination_params
 
 
 
 class DiseaseList(APIView):
+    """
+    GET /api/diseases/?page=<int>&size=<int>
+
+    Query Parameters:
+        - page (int, optional): Page number to retrieve. Default = 1
+        - size (int, optional): Number of records per page. Default = 10
+    
+    Retrieves a paginated list of diseases.
+    """
     def get(self, request):
         
-        # query param ?page=2&size=5
-        page = request.GET.get('page', 1)
-        size = request.GET.get('size', 10)
-        try:
-            page = int(page)
-            size = int(size)
-        except ValueError:
-            raise BadRequestException("Query parameters 'page' and 'size' must be integers.")
+        page, size = get_pagination_params(request)
 
         diseases = Disease.objects.all()
         paginator = Paginator(diseases, size)
@@ -41,22 +44,26 @@ class DiseaseList(APIView):
         })
     
 
-# คลาสนี้ใช้สำหรับดึงข้อมูล Disease เพียงรายการเดียวตาม pk (Primary Key)
 class DiseaseDetail(APIView):
     """
-    ดึงข้อมูล disease จาก id ที่ระบุ
+    GET /api/diseases/<pk>/
+
+    Retrieves details of a specific disease by its ID.
+
+    Path Parameters:
+        - pk (int, required): The primary key (ID) of the disease.
+
+    Response:
+        Returns a JSON object with all available fields for the disease.
+
     """
     def get(self, request, pk, format=None):
         try:
-            # 1. ค้นหา object จาก model Disease โดยใช้ pk ที่ได้รับจาก URL
             disease = Disease.objects.get(pk=pk)
         except Disease.DoesNotExist:
-            # ถ้าไม่เจอให้ raise Http404
             raise Http404("Disease not found")
 
-        # 3. หากพบข้อมูล นำ object ไป serialize (ไม่ต้องใช้ many=True เพราะเป็น object เดียว)
         serializer = DiseaseSerializer(disease)
         
-        # 4. ส่งข้อมูลที่ serialize แล้วกลับไปใน Response
         return Response(serializer.data)
 

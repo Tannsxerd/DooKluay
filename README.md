@@ -15,8 +15,8 @@
 ## Project Structure
 ```
 DooKluay/
-├── banana_api/      # Backend
-├── DooKluayWeb/     # Frontend
+├── banana_api/      # API
+├── DooKluayWeb/     # Configuration
 ├── docker-compose.dev.yml
 ├── requirements.txt
 └── manage.py
@@ -26,6 +26,7 @@ DooKluay/
 ```bash
 git clone https://github.com/Tannsxerd/DooKluay.git
 cd DooKluay
+cp .env.example .env # Edit .env and update configuration values
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
@@ -34,10 +35,6 @@ docker-compose -f docker-compose.dev.yml up --build
 ## Tech Stack
 - Backend: Python (Django)
 - Model: TensorFlow 
-- Frontend: React 
 - Deploy: Docker
 
 ---
-
-## License
-MIT
