@@ -1,4 +1,4 @@
-from ..exceptions import BadRequestException
+from ..exceptions.BadRequestException import BadRequestException
 
 def get_pagination_params(request, default_page=1, default_size=10):
     page = request.GET.get('page', default_page)
