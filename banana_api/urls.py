@@ -1,19 +1,19 @@
 from django.urls import path
 from .views.disease import DiseaseList, DiseaseDetail
 from .views.treatment import Treatmentlist, TreatmentDetails
-from .views.ImageUpload import ImageDetailView,ImageViewALL
+from .views.ImageUpload import ImageDetailView, ImageList
 
 urlpatterns = [
     # Disease endpoints
     path(
         'diseases/', 
         DiseaseList.as_view(), 
-        name='disease_List'
+        name='disease_list'
     ),
     path(
         'diseases/<int:pk>/', 
         DiseaseDetail.as_view(), 
-        name='disease-detail'
+        name='disease_detail'
     ),
 
     # Treatment endpoints
@@ -30,13 +30,13 @@ urlpatterns = [
     
     # Image endpoints
     path(
-        'images/<int:image_id>/', 
-        ImageDetailView.as_view(), 
-        name='image_detail'
+        'images/',
+        ImageList.as_view(), 
+        name='image_list'
     ),
     path(
-        'images/',
-        ImageViewALL.as_view(), 
-        name='all_image'
+        'images/<int:pk>/', 
+        ImageDetailView.as_view(), 
+        name='image_detail'
     ),
 ]

@@ -17,7 +17,7 @@ from ..utils.pagination import get_pagination_params
 
 class DiseaseList(APIView):
     """
-    GET /api/diseases/
+    GET /api/diseases/?page=<int>&size=<int>
 
     Query Parameters:
         - page (int, optional): Page number to retrieve. Default = 1

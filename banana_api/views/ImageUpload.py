@@ -1,28 +1,26 @@
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.core.paginator import Paginator
+from rest_framework.response import Response
+
 from ..models import ImageUpload
 from ..exceptions.BadRequestException import BadRequestException
-from django.core.paginator import Paginator
 from ..serializers.image import ImageSerializer
-class ImageDetailView(APIView):
-    def get(self, request, image_id,):
-        image_obj = get_object_or_404(ImageUpload, pk=image_id)
-        return JsonResponse({
-            "id": image_obj.image_id,
-            "file_path": image_obj.file_path.path,  
-            "file_url": image_obj.file_path.url
-        })
+from ..utils.pagination import get_pagination_params
 
-class ImageViewALL(APIView):
-     def get(self, request): 
-        page = request.GET.get('page', 1)
-        size = request.GET.get('size', 10)
-        try:
-            page = int(page)
-            size = int(size)
-        except ValueError:
-            raise BadRequestException("Query parameters 'page' and 'size' must be integers.")
+class ImageList(APIView):
+    """
+    GET /api/images/?page=<int>&size=<int>
+
+    Query Parameters:
+        - page (int, optional): Page number to retrieve. Default = 1
+        - size (int, optional): Number of records per page. Default = 10
+    
+    Retrieves a paginated list of images.
+    """
+    def get(self, request): 
+        page, size = get_pagination_params(request)
         
         ALLimage = ImageUpload.objects.all()
         paginator = Paginator(ALLimage, size)
@@ -37,3 +35,17 @@ class ImageViewALL(APIView):
             "page_size": size,
             "results": serializer.data
         })
+
+class ImageDetailView(APIView):
+    """
+    GET /api/images/<pk>/
+
+    Path Parameters:
+        - pk (int, required): The ID of the image to retrieve.
+    
+    Retrieves details of a specific image by ID.
+    """
+    def get(self, request, pk,):
+        image_obj = get_object_or_404(ImageUpload, pk=pk)
+        serializer = ImageSerializer(image_obj)
+        return Response(serializer.data)
