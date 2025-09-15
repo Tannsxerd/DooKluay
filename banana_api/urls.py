@@ -1,6 +1,6 @@
 from django.urls import path
 from .views.disease import DiseaseList, DiseaseDetail
-from .views.treatment import Treatmentlist, TreatmentDetails
+from .views.treatment import TreatmentList, TreatmentDetail
 from .views.ImageUpload import ImageDetailView, ImageList
 
 urlpatterns = [
@@ -19,12 +19,12 @@ urlpatterns = [
     # Treatment endpoints
     path(
         'treatments/',
-        Treatmentlist.as_view(),
+        TreatmentList.as_view(),
         name='treatment_list'
     ),
     path(
         'treatments/<int:pk>/', 
-        TreatmentDetails.as_view(), 
+        TreatmentDetail.as_view(), 
         name='treatment-detail'
     ),
     
