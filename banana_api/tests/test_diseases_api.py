@@ -14,8 +14,9 @@ class DiseaseApiTests(APITestCase):
 
     def test_list_diseases_default_pagination(self):
         """
-        GET /api/diseases/ ควรคืน 200 และมี keys: count, total_pages, current_page, page_size, results
+        GET /api/diseases/ → 200
         ค่า default page=1, size=10
+        response ต้องมี keys: count,total_pages,current_page,page_size,results
         """
         url = reverse('disease_list')
         res = self.client.get(url)
@@ -31,6 +32,12 @@ class DiseaseApiTests(APITestCase):
         self.assertEqual(body["page_size"], 10)
         self.assertEqual(len(body["results"]), 10)
 
+        # แต่ละ item ควรมี primary key ตามโมเดล: disease_id
+        first_item = body["results"][0]
+        self.assertIn("disease_id", first_item)
+        for k in ["name", "description", "symptoms"]:
+            self.assertIn(k, first_item)
+
     def test_list_diseases_custom_page_and_size(self):
         """
         GET /api/diseases/?page=2&size=7 → page 2 จะได้ 7 records
@@ -43,36 +50,34 @@ class DiseaseApiTests(APITestCase):
         self.assertEqual(body["current_page"], 2)
         self.assertEqual(body["page_size"], 7)
         self.assertEqual(len(body["results"]), 7)
+        self.assertIn("disease_id", body["results"][0])
 
     def test_list_diseases_invalid_query_params_return_400(self):
         """
-        ถ้า get_pagination_params() โยน BadRequest (เช่น page/size ผิดรูปแบบ) 
-        ควรได้ 400 ผ่าน custom exception handler ของโปรเจกต์
+        page/size ผิดรูปแบบ → 400 (ผ่าน custom exception handler)
         """
         url = reverse('disease_list')
         res = self.client.get(url, {"page": "abc", "size": "-5"})
-
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_disease_detail_ok(self):
         """
-        GET /api/diseases/<pk>/ → 200 และมีฟิลด์หลักของ Disease (แล้วแต่ serializer)
+        GET /api/diseases/<pk>/ → 200
+        pk = disease_id
         """
         obj = self.diseases[0]
-        url = reverse('disease_detail', args=[obj.pk])
+        url = reverse('disease_detail', args=[obj.pk])  # obj.pk == disease_id
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         data = res.json()
-        # เช็คอย่างน้อยว่าคืน pk เดียวกัน (serializer อาจจะใช้ 'id' หรือ field อื่น)
-        # ถ้า serializer ใช้ 'id':
-        self.assertIn("id", data)
-        self.assertEqual(data["id"], obj.id)
+
+        self.assertIn("disease_id", data)
+        self.assertEqual(data["disease_id"], obj.disease_id)
+        for k in ["name", "description", "symptoms", "image_example"]:
+            self.assertIn(k, data)
 
     def test_get_disease_detail_404(self):
-        """
-        ถ้า pk ไม่มีอยู่ ควรได้ 404
-        """
         url = reverse('disease_detail', args=[999999])
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
