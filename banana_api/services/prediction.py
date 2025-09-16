@@ -3,71 +3,65 @@ from django.conf import settings
 from rest_framework.exceptions import ValidationError, NotFound
 
 # Models
-from ..models import Disease, Prediction
+from ..models import Disease, Prediction, ImageUpload
 
-# Serializers
-from ..serializers import ImageUploadSerializer
+# Serializers - Note: Python convention is to use lowercase filenames (e.g., prediction.py)
+from ..serializers.Prediction import ImageUploadSerializer
 
-# --- Machine Learning Model Logic ---
-# คุณสามารถย้ายฟังก์ชันนี้มาจาก views.py หรือ import มาจากไฟล์ utils อื่นๆ
-def run_prediction_model(image_path):
-    """
-    จำลองการทำงานของโมเดล Machine Learning กับรูปภาพ
-    
-    Args:
-        image_path (str): Path แบบเต็มของไฟล์รูปภาพ
-
-    Returns:
-        tuple: (predicted_disease_name, confidence_score)
-    """
-    # =================================================================
-    # TODO: นำโค้ดการทำนายผลของโมเดลจริงมาใส่แทนที่ส่วนนี้
-    # =================================================================
-    print(f"Simulating prediction for: {image_path}")
-    # เพื่อการสาธิต จะ return ค่าคงที่กลับไป
-    return ('Tomato___Late_blight', 0.987)
+# Utils - Note: Python convention is to use lowercase filenames (e.g., cnn_model_handler.py)
+from ..utils.Cnn_model_handler import model_handler_instance
 
 
 class PredictionService:
     """
-    Service class to encapsulate the business logic for predictions.
+    Service class encapsulating the business logic for creating predictions.
+    Handles image upload validation, model inference, and database record creation.
     """
     @staticmethod
     def create_prediction_from_upload(request_data):
         """
-        จัดการตรรกะหลักในการสร้าง prediction จากรูปภาพที่อัปโหลด
-        1. ตรวจสอบและบันทึกรูปภาพ
-        2. เรียกใช้โมเดลเพื่อทำนายผล
-        3. สร้างและ return Prediction object ที่ได้
-        
-        Raises:
-            ValidationError: หากข้อมูลที่ส่งมาไม่ถูกต้อง
-            NotFound: หากไม่พบโรคที่ทำนายได้ในฐานข้อมูล
+        Main logic for creating a prediction from an uploaded image:
+        1. Validate and save uploaded image
+        2. Run CNN model prediction
+        3. Match predicted disease with the database
+        4. Create a Prediction record linking image, disease, and confidence score
         """
-        # 1. ตรวจสอบไฟล์ที่อัปโหลดด้วย serializer
+        # Step 1: Validate the uploaded image using the serializer
         upload_serializer = ImageUploadSerializer(data=request_data)
         if not upload_serializer.is_valid():
+            # Raise DRF ValidationError if the input data is invalid
             raise ValidationError(upload_serializer.errors)
 
-        # 2. บันทึก instance ของรูปภาพที่อัปโหลด
+        # Save the uploaded image instance in the database
         image_upload_instance = upload_serializer.save()
-        image_path = os.path.join(settings.MEDIA_ROOT, image_upload_instance.image.name)
 
-        # 3. เรียกใช้โมเดลทำนายผล
-        predicted_disease_name, confidence = run_prediction_model(image_path)
+        # Get the full absolute path of the uploaded image
+        # This path will be used by the CNN model for prediction
+        image_path = image_upload_instance.file_path.path
 
-        # 4. ค้นหา Disease object ที่ตรงกันในฐานข้อมูล
+        # Step 2: Predict disease using the CNN model handler
+        try:
+            predicted_disease_name, confidence = model_handler_instance.predict(image_path)
+        except Exception as e:
+            # Log the actual exception for debugging purposes
+            print(f"ERROR: Model prediction failed - {e}")
+            # Raise a general RuntimeError for the API response
+            raise RuntimeError("An unexpected error occurred while processing the image.")
+
+        # Step 3: Find the Disease object in the database matching the predicted name
         try:
             disease = Disease.objects.get(name=predicted_disease_name)
         except Disease.DoesNotExist:
-            # หากไม่พบโรคที่ทำนายได้ ให้ raise exception
-            raise NotFound(detail=f"Predicted disease '{predicted_disease_name}' not found in the database.")
+            # Raise a 404 NotFound if the predicted disease does not exist in DB
+            raise NotFound(detail=f"The predicted disease '{predicted_disease_name}' could not be found in the database.")
 
-        # 5. สร้าง Prediction record ใหม่
+        # Step 4: Create and save a new Prediction record
+        # Links the uploaded image, predicted disease, and confidence score
         prediction_instance = Prediction.objects.create(
             image=image_upload_instance,
             disease=disease,
             confidence=confidence
         )
 
+        # Return the newly created Prediction instance
         return prediction_instance
