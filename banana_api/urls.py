@@ -2,7 +2,8 @@ from django.urls import path
 from .views.Prediction import PredictionViewSet, PredictionHistoryViewSet
 from .views.disease import DiseaseList, DiseaseDetail
 from .views.treatment import TreatmentList, TreatmentDetail
-from .views.ImageUpload import ImageDetailView, ImageList
+from .views.image_upload import ImageDetailView, ImageList
+from .views.model_flie import ModelDetailView, ModelList
 
 urlpatterns = [
     # Disease endpoints
@@ -44,13 +45,13 @@ urlpatterns = [
     # Model endpoints
     path(
         'models/',
-        ImageList.as_view(), 
-        name='image_list'
+        ModelList.as_view(), 
+        name='model_list'
     ),
     path(
         'models/<int:pk>/', 
-        ImageDetailView.as_view(), 
-        name='image_detail'
+        ModelDetailView.as_view(), 
+        name='model_detail'
     ),
 
     # Predict endpoints
