@@ -1,17 +1,15 @@
 from rest_framework.views import APIView
+from ..utils.pagination import get_pagination_params
 from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
+from ..models import ModelFile
 from django.core.paginator import Paginator
+from ..serializers.model_file import ModelFileSerializer
+from django.http import JsonResponse
 from rest_framework.response import Response
 
-from ..models import ImageUpload
-from ..exceptions.BadRequestException import BadRequestException
-from ..serializers.image import ImageSerializer
-from ..utils.pagination import get_pagination_params
-
-class ImageList(APIView):
+class ModelList(APIView):
     """
-    GET /api/images/?page=<int>&size=<int>
+    GET /api/model/?page=<int>&size=<int>
 
     Query Parameters:
         - page (int, optional): Page number to retrieve. Default = 1
@@ -22,11 +20,10 @@ class ImageList(APIView):
     def get(self, request): 
         page, size = get_pagination_params(request)
         
-        ALLimage = ImageUpload.objects.all()
-        paginator = Paginator(ALLimage, size)
+        ALLmodel = ModelFile.objects.all()
+        paginator = Paginator(ALLmodel, size)
         page_obj = paginator.get_page(page)
-
-        serializer = ImageSerializer(page_obj, many=True)
+        serializer = ModelFileSerializer(page_obj, many=True, context={"request": request})
 
         return JsonResponse({
             "count": paginator.count,
@@ -36,9 +33,9 @@ class ImageList(APIView):
             "results": serializer.data
         })
 
-class ImageDetailView(APIView):
+class ModelDetailView(APIView):
     """
-    GET /api/images/<pk>/
+    GET /api/model/<pk>/
 
     Path Parameters:
         - pk (int, required): The ID of the image to retrieve.
@@ -46,6 +43,6 @@ class ImageDetailView(APIView):
     Retrieves details of a specific image by ID.
     """
     def get(self, request, pk,):
-        image_obj = get_object_or_404(ImageUpload, pk=pk)
-        serializer = ImageSerializer(image_obj)
+        image_obj = get_object_or_404(ModelFile, pk=pk)
+        serializer = ModelFileSerializer(image_obj, context={"request": request})
         return Response(serializer.data)
