@@ -39,4 +39,15 @@ urlpatterns = [
         ImageDetailView.as_view(), 
         name='image_detail'
     ),
+    # Model endpoints
+    path(
+        'models/',
+        ImageList.as_view(), 
+        name='image_list'
+    ),
+    path(
+        'models/<int:pk>/', 
+        ImageDetailView.as_view(), 
+        name='image_detail'
+    ),
 ]
