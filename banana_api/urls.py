@@ -1,24 +1,72 @@
 from django.urls import path
-from .views.disease import DiseaseList
-from .views.Prediction import PredictionViewSet,PredictionHistoryViewSet
+from .views.Prediction import PredictionViewSet, PredictionHistoryViewSet
+from .views.disease import DiseaseList, DiseaseDetail
+from .views.treatment import TreatmentList, TreatmentDetail
+from .views.ImageUpload import ImageDetailView, ImageList
 
-# Define urlpatterns by manually specifying each path
 urlpatterns = [
-    # --- Endpoints for Disease (using APIView) ---
+    # Disease endpoints
+    path(
+        'diseases/', 
+        DiseaseList.as_view(), 
+        name='disease_list'
+    ),
+    path(
+        'diseases/<int:pk>/', 
+        DiseaseDetail.as_view(), 
+        name='disease_detail'
+    ),
 
-    # GET /diseases/ -> calls the DiseaseList view
-    path('diseases/', DiseaseList.as_view(), name='disease-list'),
-
-    # --- Endpoints for Prediction (using ViewSet) ---
-    # We will manually map HTTP methods to view actions
-
-    # POST /predict/ -> maps to the 'create' action of PredictionViewSet
-    path('predict/', PredictionViewSet.as_view({'post': 'create'}), name='predict-create'),
+    # Treatment endpoints
+    path(
+        'treatments/',
+        TreatmentList.as_view(),
+        name='treatment_list'
+    ),
+    path(
+        'treatments/<int:pk>/', 
+        TreatmentDetail.as_view(), 
+        name='treatment-detail'
+    ),
     
-    # GET /predictions/ -> maps to the 'list' action of PredictionHistoryViewSet
-    path('predictions/', PredictionHistoryViewSet.as_view({'get': 'list'}), name='prediction-history-list'),
-    
-    # GET /predictions/{id}/ -> maps to the 'retrieve' action of PredictionHistoryViewSet
-    path('predictions/<int:pk>/', PredictionHistoryViewSet.as_view({'get': 'retrieve'}), name='prediction-history-detail'),
+    # Image endpoints
+    path(
+        'images/',
+        ImageList.as_view(), 
+        name='image_list'
+    ),
+    path(
+        'images/<int:pk>/', 
+        ImageDetailView.as_view(), 
+        name='image_detail'
+    ),
+
+    # Model endpoints
+    path(
+        'models/',
+        ImageList.as_view(), 
+        name='image_list'
+    ),
+    path(
+        'models/<int:pk>/', 
+        ImageDetailView.as_view(), 
+        name='image_detail'
+    ),
+
+    # Predict endpoints
+    path(
+        'predict/', 
+        PredictionViewSet.as_view({'post': 'create'}), 
+        name='predict-create'
+    ),
+    path(
+        'predictions/', 
+        PredictionHistoryViewSet.as_view({'get': 'list'}), 
+        name='prediction-history-list'
+    ),
+    path(
+        'predictions/<int:pk>/', 
+        PredictionHistoryViewSet.as_view({'get': 'retrieve'}), 
+        name='prediction-history-detail'
+    ),
 ]
-
