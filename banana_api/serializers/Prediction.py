@@ -9,10 +9,12 @@ class ImageUploadSerializer(serializers.ModelSerializer):
     Serializer for handling image file uploads.
     It takes an image file and saves it to an ImageUpload record.
     """
+
+    image = serializers.ImageField(source='file_path')
+
     class Meta:
         model = ImageUpload
-        # Only the 'image' field is needed for the upload
-        fields = ['file_path']
+        fields = ['image']
 
 
 class SimpleDiseaseSerializer(serializers.ModelSerializer):
